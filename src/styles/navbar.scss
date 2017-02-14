@@ -1,0 +1,57 @@
+body {
+  font-family: sans-serif;
+  background-color: #F6C390;
+  #app {
+    .nav-container {
+      position: relative;
+      width: 100%;
+      background-color: #533557;
+      overflow: hidden;
+      padding: 10px 80px 10px 10px;
+      nav {
+        $transition-duration: 0.5s;
+        height: 22px;
+        width: 100%;
+        div.sign {
+          position: absolute;
+          float: left;
+          clear: both;
+          height: 18px;
+          svg {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            transition: all $transition-duration;
+            line {
+              stroke: #EC7263;
+            }
+          }
+        }
+        a.nav-item {
+          user-select: none;
+          display: inline-block;
+          float: left;
+          clear: both;
+          text-decoration: none;
+          text-transform: uppercase;
+          width: 100%;
+          transition: letter-spacing $transition-duration,
+                      color $transition-duration,
+                      height $transition-duration,
+                      line-height $transition-duration,
+                      margin $transition-duration,
+                      padding $transition-duration,
+                      transform $transition-duration,
+                      width $transition-duration;
+          &:hover {
+            background-color: #634567
+          }
+          &:active {
+            background-color: #533557;
+          }
+        }
+      }
+    }
+  }
+}
