@@ -23,13 +23,19 @@ import view from './view'
 **/
 
 // Navbar :: Stream({Path, Open, Array(Item)}) -> Sources -> Sinks
-function Navbar(prop$, sources) {
+function Navbar(sources, props$) {
+  const childrenDOM$ = props$
+    .map(props => props.button.DOM)
+    .flatten()
+  const childrenState$ = props$
+    .map(props => props.button.state$)
+    .flatten()
   const actions = intent(sources)
-  const {update$, path$} = model(prop$, actions)
-  const view$ = view(update$)
+  const {state$, path$} = model(props$, {...actions, toggleMenu$: childrenState$})
+  const view$ = view(state$, childrenDOM$)
   return {
     DOM: view$,
-    state$: update$,
+    state$: state$,
     path$: path$
   }
 }

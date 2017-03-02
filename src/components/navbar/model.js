@@ -1,50 +1,55 @@
 import xs from 'xstream'
 import concat from 'xstream/extra/concat'
+import tween from 'xstream/extra/tween'
+import delay from 'xstream/extra/delay'
+import sampleCombine from 'xstream/extra/sampleCombine'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import {prop, compose, isNil, not} from 'ramda'
+import {prop, compose, isNil, not, curry, merge} from 'ramda'
+
+const toState = props => {
+  return {
+    items: props.items.map(item =>
+      item.href === props.path
+        ? Object.assign({}, item, {active: true})
+        : Object.assign({}, item, {active: false})
+      ),
+    open: props.open
+  }
+}
+
+const toggleOpen = state => Object.assign({}, state, {open: !state.open})
+const setClosed = state => Object.assign({}, state, {open: false})
+const setPath = curry((path, state) => Object.assign({}, state, {path: path}))
 
 const model = (props$, actions) => {
-  const menuIsOpen$ = concat(
-      props$.map(prop('open')),
-      xs.merge(
-        actions.toggleMenu$,
-        actions.closeMenu$
-      )
-    )
-    .fold((acc, curr) => curr ? !acc : curr)
-    .filter(compose(not, isNil))
-  const item$ = props$
-    .map(({items, path$}) => path$
-      .map(path => items
-        .map(item =>
-          item.href === path
-          ? Object.assign({}, item, {active: true})
-          : Object.assign({}, item, {active: false})
-        )
-      )
-    )
+  const initialState$ = props$.take(1)
+  const closeMenu$ = actions.closeMenu$
+    .map(_ => setClosed)
+  const toggleMenu$ = actions.toggleMenu$
+    .map(_ => toggleOpen)
+  const pathChanged$ = actions.pathName$
+    .map(setPath)
+    .compose(delay(500))
+  const changes$ = xs.merge(toggleMenu$, closeMenu$, pathChanged$)
+  const state$ = changes$
+    .fold((state, transform) => state.map(transform), initialState$)
     .flatten()
+    .map(toState)
+
   const path$ = concat(
       props$
-        .map(prop('path$'))
-        .flatten()
+        .map(prop('path'))
         .take(1),
       actions.pathName$
     )
     .compose(dropRepeats())
     .drop(1)
-  const update$ = xs.combine(
-      menuIsOpen$,
-      item$
-    )
-    .map(([isOpen, items]) => Object.assign({}, {
-      open: isOpen,
-      items: items,
-    }))
+
   return {
     path$: path$,
-    update$: update$
+    state$: state$
   }
 }
 
 export default model
+export {toState}

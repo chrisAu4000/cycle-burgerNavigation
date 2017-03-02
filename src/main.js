@@ -1,36 +1,51 @@
 import xs from 'xstream'
 import delay from 'xstream/extra/delay'
-import dropRepeats from 'xstream/extra/dropRepeats'
+import tween from 'xstream/extra/tween'
 import {state, routes} from './state'
-import Navbar from './components/navbar'
-import ContentRouter from './components/content-router'
-import {prop} from 'ramda'
 import {div} from '@cycle/dom'
+
 import Home from './dialogue/home'
 import Other from './dialogue/other'
 
-const options = {
+import ContentRouter from './components/content-router'
+import MenuButton from './components/menuButton'
+import Navbar from './components/navbar'
+
+const routerOpts = {
   routes: {
     '/': Home,
     '/history': Other
   }
 }
 const view$ = (navigation, content) => {
-  return xs.combine(navigation, content).map(div)
+  return xs.combine(
+    navigation,
+    // content
+  )
+  .map(div)
 }
 function main(sources) {
-  const {state$, DOM, path$} = ContentRouter(sources, options)
-  const prop$ = xs.of({
-    path$: path$,
-    open: false,
+  const {state$, DOM, path$} = ContentRouter(sources, routerOpts)
+  const open = true
+  const menuButton = MenuButton(sources, xs.of({
+    open: open,
+    duration: 250,
+    easing: tween.power4.easeOut
+  }))
+  const props$ = path$.map(path => ({
+    path: path,
+    open: open,
     items: [
-      {text: 'Dashboard', href: '/'},
-      {text: 'History', href: '/history'},
+      {text: 'Dashboard',  href: '/'},
+      {text: 'History',    href: '/history'},
       {text: 'Statistics', href: '/stats'},
-      {text: 'Settings', href: '/settings'},
-    ]
-  })
-  const navbar = Navbar(prop$, sources)
+      {text: 'Settings',   href: '/settings'},
+    ],
+    button: menuButton,
+  }))
+
+  const navbar = Navbar(sources, props$)
+  menuButton.toggle$.imitate(navbar.path$)
   return {
     DOM: view$(navbar.DOM, DOM),
     state$: state$.startWith({}),

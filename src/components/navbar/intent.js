@@ -5,15 +5,15 @@ const preventDefault = (evt) => {
   return evt
 }
 const intent = ({DOM}) => ({
-  toggleMenu$: DOM
-    .select('.nav-container .nav .sign')
-    .events('click')
-    .mapTo(true),
+  // toggleMenu$: DOM
+  //   .select('.nav-container .nav .menuButton')
+  //   .events('click')
+  //   .mapTo(null),
   closeMenu$: DOM
     .select('.nav-item')
     .events('click')
     .map(preventDefault)
-    .mapTo(false),
+    .mapTo(null),
   pathName$: DOM
     .select('.nav-item')
     .events('click')

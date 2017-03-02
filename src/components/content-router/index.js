@@ -1,10 +1,9 @@
 import xs from 'xstream'
-import {div} from '@cycle/dom'
-import {prop, merge, head} from 'ramda'
+import {prop} from 'ramda'
 
 function ContentRouter(sources, options = {}) {
   const routes = options.routes || {}
-  const {router, state$} = sources
+  const {router} = sources
   const match$ = router.define(routes)
   const page$ = match$
     .map(({path, value}) => value({
